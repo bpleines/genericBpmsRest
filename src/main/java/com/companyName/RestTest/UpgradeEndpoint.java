@@ -14,11 +14,12 @@ public interface UpgradeEndpoint {
 	public Response startProcess(@PathParam("group") String group, @PathParam("artifact") String artifact,
 			@PathParam("version") String version, @PathParam("processId") String processId);
 	
+	// method to send a signal to a given processInstance
 	@GET
-	@Path(value = "/{processInstanceIdString}/{sendSignal}")
-	public Response sendSignal(@PathParam("processInstanceIdString") String processInstanceIdString, @PathParam("sendSignal") String sendSignal);
+	@Path(value = "/{processId}/{processInstanceIdString}/{sendSignal}")
+	public Response sendSignal(@PathParam("processId") String processId, @PathParam("processInstanceIdString") String processInstanceIdString, @PathParam("sendSignal") String sendSignal);
 	
-	
+	// method to retrieve the status of a processInstance
 	@GET
 	@Path(value = "/{group}/{artifact}/{version}/{processId}/{processInstanceIdString}")
 	public Response retrieveStatus(@PathParam("group") String group, @PathParam("artifact") String artifact,

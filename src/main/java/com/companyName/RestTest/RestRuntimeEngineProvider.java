@@ -11,7 +11,8 @@ public class RestRuntimeEngineProvider {
 		//Configuration specifying our local BPMS instance and Deployment
 				URL deploymentUrl = null;
 				try {
-					deploymentUrl = new URL("http://localhost:8080/business-central");
+					//52.89.250.89
+					deploymentUrl = new URL("http://52.89.250.89:8080/business-central");
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

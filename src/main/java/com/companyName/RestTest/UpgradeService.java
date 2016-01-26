@@ -51,32 +51,32 @@ public class UpgradeService implements UpgradeEndpoint {
 
 		// Code to let me know know is going on with the process
 		if (processInstance.getState() == ProcessInstance.STATE_COMPLETED)
-			return Response.ok("Process "+processId+" started and completed !").build();
+			return Response.ok("Process "+processId + "." +processInstanceId +" started and completed !").build();
 		else if (processInstance.getState() == ProcessInstance.STATE_ACTIVE)
-			return Response.ok("Process "+processId+" started and is still active !").build();
+			return Response.ok("Process "+processId+ "." +processInstanceId + " started and is still active !").build();
 		else if (processInstance.getState() == ProcessInstance.STATE_PENDING)
-			return Response.ok("Process "+processId+" started and is currently pending !").build();
+			return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently pending !").build();
 		else if (processInstance.getState() == ProcessInstance.STATE_SUSPENDED)
-			return Response.ok("Process "+processId+" started and is currently suspended !").build();
+			return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently suspended !").build();
 		else if (processInstance.getState() == ProcessInstance.STATE_ABORTED)
-			return Response.ok("Process "+processId+" started but has aborted !").build();
+			return Response.ok("Process "+processId+ "." +processInstanceId + " started but has aborted !").build();
 		else
 			return Response.serverError().build();
 	}
 
-	public Response sendSignal(String processInstanceIdString, String sendSignal) {
+	public Response sendSignal(String processId, String processInstanceIdString, String sendSignal) {
 		LOG.info("REST request to sendSingal to process SignalTest");
 		RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine("example", "Test", "1.0");
 		KieSession ksession = runtimeEngine.getKieSession();
 		long processInstanceId = Long.valueOf(processInstanceIdString);
 		String data = "Data!";
 		ksession.signalEvent("fileReceived", data, processInstanceId);
-		return Response.ok("Process " + processInstanceIdString + " was successfully signaled to continue executing").build();
+		return Response.ok("Process " + processId + "." + processInstanceIdString + " was successfully signaled to continue executing").build();
 	}
 
 	public Response retrieveStatus(String group, String artifact,
 			String version, String processId, String processInstanceIdString) {
-		LOG.info("Checking to see updated status of processInstance " + group + " " + artifact + " " + version + " " + processId + " " + processInstanceIdString);
+		LOG.info("Checking to see updated status of " + group + "." + artifact + "." + version + "." + processId + "." + processInstanceIdString);
 		RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine("example", "Test", "1.0");
 		KieSession ksession = runtimeEngine.getKieSession();
 		long processInstanceId = Long.valueOf(processInstanceIdString);
@@ -85,23 +85,23 @@ public class UpgradeService implements UpgradeEndpoint {
 		
 		//If the process instance is completed, then trying to get its state results in a NullPointerException, which is caught below
 		try {
-				if (processInstance.getState() == ProcessInstance.STATE_COMPLETED)
-					return Response.ok("Process "+processId+" started and completed !").build();
-				else if (processInstance.getState() == ProcessInstance.STATE_ACTIVE)
-					return Response.ok("Process "+processId+" started and is still active !").build();
-				else if (processInstance.getState() == ProcessInstance.STATE_PENDING)
-					return Response.ok("Process "+processId+" started and is currently pending !").build();
-				else if (processInstance.getState() == ProcessInstance.STATE_SUSPENDED)
-					return Response.ok("Process "+processId+" started and is currently suspended !").build();
-				else if (processInstance.getState() == ProcessInstance.STATE_ABORTED)
-					return Response.ok("Process "+processId+" started but has aborted !").build();
-				else
-					return Response.serverError().build();
+			if (processInstance.getState() == ProcessInstance.STATE_COMPLETED)
+				return Response.ok("Process "+processId + "." +processInstanceId +" started and completed !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_ACTIVE)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started and is still active !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_PENDING)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently pending !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_SUSPENDED)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently suspended !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_ABORTED)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started but has aborted !").build();
+			else
+				return Response.serverError().build();
 		}
 
 		catch (NullPointerException e) {
 			System.err.println("NullPointerException: " + e.getMessage());
-			return Response.ok("Process "+processId+" has likely completed given that a retrieval of its state results in null. Consult Business Central to validate").build();
+			return Response.ok("Process "+processId+ "." + processInstanceId + " has likely completed given that a retrieval of its state results in null. Consult Business Central Process Instances under the Deployments tab to validate").build();
 			
 		}
 		
