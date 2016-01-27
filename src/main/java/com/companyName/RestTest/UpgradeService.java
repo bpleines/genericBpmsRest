@@ -1,5 +1,6 @@
 package com.companyName.RestTest;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,27 +22,44 @@ import org.slf4j.LoggerFactory;
 public class UpgradeService implements UpgradeEndpoint {
 	private static final Logger LOG = LoggerFactory.getLogger(UpgradeService.class);
 	
-	RestRuntimeEngineProvider runtimeEngineProvider = new RestRuntimeEngineProvider();
+	RuntimeEngineProvider runtimeEngineProvider;
+	
+	public UpgradeService() {
+		this(new RestRuntimeEngineProvider());
+	}
+	
+	// This constructor enables testing with a MockRuntimeEngineProvider
+	public UpgradeService(RuntimeEngineProvider runtimeEngineProvider){
+		this.runtimeEngineProvider = runtimeEngineProvider;
+	}
 
 	// method to check the whether extended path of the application is functioning properly
 	public Response healthCheck() {
 		return Response.ok("Healthy!").build();
 	}
+	
+//	public ProcessInstance kickOffProcess(String group, String artifact, String version, String processId) throws MalformedURLException {
+//		LOG.info("REST request to start process "+processId+" in " + group + ":" + artifact + ":" + version);
+//		RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine(group, artifact, version);
+//		KieSession kieSession = runtimeEngine.getKieSession();
+//		TaskService taskService = runtimeEngine.getTaskService();
+//		
+//		//start process with a generic inserted process variable String "checker"
+//		String checker = "Hello There!";
+//		Map<String,Object> parameters = new HashMap<String,Object>();
+//		parameters.put("checker", checker);
+//		//ProcessInstance processInstance = kieSession.startProcess(processId, parameters);
+//		return kieSession.startProcess(processId);
+//	}
 
 	// method to start a process with the following parameters supplied from a url path
 	public Response startProcess(String group, String artifact, String version,
-			String processId) {
-		LOG.info("REST request to start process "+processId+" in " + group + ":" + artifact + ":" + version);
-		RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine(group, artifact, version);
-		KieSession kieSession = runtimeEngine.getKieSession();
-		TaskService taskService = runtimeEngine.getTaskService();
+			String processId) throws MalformedURLException {
 		
-		//start process with a generic inserted process variable String "checker"
-		String checker = "Hello There!";
-		Map<String,Object> parameters = new HashMap<String,Object>();
-		parameters.put("checker", checker);
-		//ProcessInstance processInstance = kieSession.startProcess(processId, parameters);
-		ProcessInstance processInstance = kieSession.startProcess(processId);
+		ProcessService processService = ProcessService.getInstance();
+		
+		ProcessInstance processInstance = processService.startProcess(group, artifact, version, processId);
+		
 		long processInstanceId = processInstance.getId();
 		String processInstanceIdString = Long.toString(processInstanceId);
 		LOG.info("This processInstanceId is " + processInstanceId);
@@ -50,21 +68,32 @@ public class UpgradeService implements UpgradeEndpoint {
 		//ProcessInstance processInstance = kieSession.startProcess(processId);
 
 		// Code to let me know know is going on with the process
-		if (processInstance.getState() == ProcessInstance.STATE_COMPLETED)
+		LOG.info("the states is " + processInstance.getState());
+		
+		if (processInstance.getState() == ProcessInstance.STATE_COMPLETED) {
 			return Response.ok("Process "+processId + "." +processInstanceId +" started and completed !").build();
-		else if (processInstance.getState() == ProcessInstance.STATE_ACTIVE)
+			
+		} else if (processInstance.getState() == ProcessInstance.STATE_ACTIVE) {
+			
 			return Response.ok("Process "+processId+ "." +processInstanceId + " started and is still active !").build();
-		else if (processInstance.getState() == ProcessInstance.STATE_PENDING)
+		} else if (processInstance.getState() == ProcessInstance.STATE_PENDING) {
+			
 			return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently pending !").build();
-		else if (processInstance.getState() == ProcessInstance.STATE_SUSPENDED)
+		} else if (processInstance.getState() == ProcessInstance.STATE_SUSPENDED) {
+			
 			return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently suspended !").build();
-		else if (processInstance.getState() == ProcessInstance.STATE_ABORTED)
+		} else if (processInstance.getState() == ProcessInstance.STATE_ABORTED) {
+			
 			return Response.ok("Process "+processId+ "." +processInstanceId + " started but has aborted !").build();
-		else
+		} else {
 			return Response.serverError().build();
+			
+		}
 	}
 
-	public Response sendSignal(String processId, String processInstanceIdString, String sendSignal) {
+	
+	
+	public Response sendSignal(String processId, String processInstanceIdString, String sendSignal) throws MalformedURLException {
 		LOG.info("REST request to sendSingal to process SignalTest");
 		RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine("example", "Test", "1.0");
 		KieSession ksession = runtimeEngine.getKieSession();
@@ -75,7 +104,7 @@ public class UpgradeService implements UpgradeEndpoint {
 	}
 
 	public Response retrieveStatus(String group, String artifact,
-			String version, String processId, String processInstanceIdString) {
+			String version, String processId, String processInstanceIdString) throws MalformedURLException {
 		LOG.info("Checking to see updated status of " + group + "." + artifact + "." + version + "." + processId + "." + processInstanceIdString);
 		RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine("example", "Test", "1.0");
 		KieSession ksession = runtimeEngine.getKieSession();
@@ -106,6 +135,8 @@ public class UpgradeService implements UpgradeEndpoint {
 		}
 		
 	}
+	
+	
 
 	public Response testPost(String jsonPostString) {
 		LOG.info(jsonPostString);

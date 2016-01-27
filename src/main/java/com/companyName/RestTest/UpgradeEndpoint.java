@@ -1,5 +1,7 @@
 package com.companyName.RestTest;
 
+import java.net.MalformedURLException;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -13,18 +15,18 @@ public interface UpgradeEndpoint {
 	@GET
 	@Path(value = "/{group}/{artifact}/{version}/{processId}")
 	public Response startProcess(@PathParam("group") String group, @PathParam("artifact") String artifact,
-			@PathParam("version") String version, @PathParam("processId") String processId);
+			@PathParam("version") String version, @PathParam("processId") String processId) throws MalformedURLException;
 	
 	// method to send a signal to a given processInstance
 	@GET
 	@Path(value = "/{processId}/{processInstanceIdString}/{sendSignal}")
-	public Response sendSignal(@PathParam("processId") String processId, @PathParam("processInstanceIdString") String processInstanceIdString, @PathParam("sendSignal") String sendSignal);
+	public Response sendSignal(@PathParam("processId") String processId, @PathParam("processInstanceIdString") String processInstanceIdString, @PathParam("sendSignal") String sendSignal) throws MalformedURLException;
 	
 	// method to retrieve the status of a processInstance
 	@GET
 	@Path(value = "/{group}/{artifact}/{version}/{processId}/{processInstanceIdString}")
 	public Response retrieveStatus(@PathParam("group") String group, @PathParam("artifact") String artifact,
-			@PathParam("version") String version, @PathParam("processId") String processId, @PathParam("processInstanceIdString") String processInstanceIdString);
+			@PathParam("version") String version, @PathParam("processId") String processId, @PathParam("processInstanceIdString") String processInstanceIdString) throws MalformedURLException;
 	
 	// method to check the whether extended path of the application is functioning properly
 	@GET
