@@ -107,5 +107,11 @@ public class UpgradeService implements UpgradeEndpoint {
 		
 	}
 
+	public Response testPost(String jsonPostString) {
+		LOG.info(jsonPostString);
+		return Response.ok("DOm was here" + jsonPostString).build();
+	
+	}
+
 }
 

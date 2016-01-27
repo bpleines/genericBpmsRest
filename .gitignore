@@ -1,0 +1,7 @@
+/target/
+
+.index/*
+.niogit/*
+.project
+.settings/*
+.classpath
