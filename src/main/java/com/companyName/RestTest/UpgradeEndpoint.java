@@ -9,6 +9,11 @@ import javax.ws.rs.core.Response;
 @Path(value="/companyName")
 public interface UpgradeEndpoint {
 	
+	// method to check the whether extended path of the application is functioning properly
+		@GET
+		@Path(value = "/health")
+		public Response healthCheck();
+		
 	// method to start a process with the following parameters
 	@GET
 	@Path(value = "/{group}/{artifact}/{version}/{processId}")
@@ -26,10 +31,12 @@ public interface UpgradeEndpoint {
 	public Response retrieveStatus(@PathParam("group") String group, @PathParam("artifact") String artifact,
 			@PathParam("version") String version, @PathParam("processId") String processId, @PathParam("processInstanceIdString") String processInstanceIdString);
 	
-	// method to check the whether extended path of the application is functioning properly
+	// method to start a process with a variable called progressVar
 	@GET
-	@Path(value = "/health")
-	public Response healthCheck();
+	@Path(value = "/{group}/{artifact}/{version}/{processId}/progress")
+	public Response startProcessWithVariable(@PathParam("group") String group, @PathParam("artifact") String artifact,
+			@PathParam("version") String version, @PathParam("processId") String processId);
+	
 	
 	@POST
 	@Path(value = "/postTest")

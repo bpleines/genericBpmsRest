@@ -12,7 +12,7 @@ public class RestRuntimeEngineProvider {
 				URL deploymentUrl = null;
 				try {
 					//52.89.250.89
-					deploymentUrl = new URL("http://52.89.250.89:8080/business-central");
+					deploymentUrl = new URL("http://localhost:8080/business-central");
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

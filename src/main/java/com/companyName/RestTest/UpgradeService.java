@@ -3,9 +3,12 @@ package com.companyName.RestTest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.Response;
 
+import org.kie.api.runtime.KieContext;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.manager.RuntimeEngine;
 import org.kie.api.runtime.manager.audit.AuditService;
@@ -106,6 +109,48 @@ public class UpgradeService implements UpgradeEndpoint {
 		}
 		
 	}
+	
+	// method to start a process with the following parameters supplied from a url path
+		public Response startProcessWithVariable(String group, String artifact, String version,
+				String processId) {
+			LOG.info("REST request to start process "+processId+" in " + group + ":" + artifact + ":" + version);
+			RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine(group, artifact, version);
+			KieSession kieSession = runtimeEngine.getKieSession();
+			TaskService taskService = runtimeEngine.getTaskService();
+	
+			
+			//start process with a generic inserted process variable String "progressVar"
+			String progressVar = "notInProduction";
+			/* code to remove non-UTF characters
+			Pattern nonUtf = Pattern.compile("[^\\x00-\\x75]", Pattern.UNICODE_CASE | Pattern.CANON_EQ | Pattern.CASE_INSENSITIVE);
+			Matcher nonUtfMatcher = nonUtf.matcher(progressVar);
+			progressVar = nonUtfMatcher.replaceAll(" ");
+			*/
+			Map<String,Object> parameters = new HashMap<String,Object>();
+			parameters.put("Progress", progressVar);
+			ProcessInstance processInstance = kieSession.startProcess(processId, parameters);
+			//ProcessInstance processInstance = kieSession.startProcess(processId);
+			long processInstanceId = processInstance.getId();
+			String processInstanceIdString = Long.toString(processInstanceId);
+			LOG.info("This processInstanceId is " + processInstanceId);
+			LOG.info("The processInstanceId as a string is " + processInstanceIdString);
+			//or start without the added process variable String "checker"
+			//ProcessInstance processInstance = kieSession.startProcess(processId);
+
+			// Code to let me know know is going on with the process
+			if (processInstance.getState() == ProcessInstance.STATE_COMPLETED)
+				return Response.ok("Process "+processId + "." +processInstanceId +" started and completed !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_ACTIVE)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started and is still active !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_PENDING)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently pending !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_SUSPENDED)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started and is currently suspended !").build();
+			else if (processInstance.getState() == ProcessInstance.STATE_ABORTED)
+				return Response.ok("Process "+processId+ "." +processInstanceId + " started but has aborted !").build();
+			else
+				return Response.serverError().build();
+		}
 
 	public Response testPost(String jsonPostString) {
 		LOG.info(jsonPostString);
