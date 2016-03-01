@@ -14,7 +14,7 @@ public interface UpgradeEndpoint {
 		@Path(value = "/health")
 		public Response healthCheck();
 		
-	// method to start a process with the following parameters
+	// method to start a processInstance with the following parameters
 	@GET
 	@Path(value = "/{group}/{artifact}/{version}/{processId}")
 	public Response startProcess(@PathParam("group") String group, @PathParam("artifact") String artifact,
@@ -31,11 +31,17 @@ public interface UpgradeEndpoint {
 	public Response retrieveStatus(@PathParam("group") String group, @PathParam("artifact") String artifact,
 			@PathParam("version") String version, @PathParam("processId") String processId, @PathParam("processInstanceIdString") String processInstanceIdString);
 	
-	// method to start a process with a variable called progressVar
+	// method to start a processInstance with a variable called progressVar
 	@GET
 	@Path(value = "/{group}/{artifact}/{version}/{processId}/progress")
 	public Response startProcessWithVariable(@PathParam("group") String group, @PathParam("artifact") String artifact,
 			@PathParam("version") String version, @PathParam("processId") String processId);
+	
+	// method to check tasks of a processInstance
+		@GET
+		@Path(value = "/{group}/{artifact}/{version}/{processId}/{processInstanceId}/progress/task")
+		public Response checkTasks(@PathParam("group") String group, @PathParam("artifact") String artifact,
+				@PathParam("version") String version, @PathParam("processId") String processId, @PathParam("processInstanceId") String processInstanceId);
 	
 	
 	@POST

@@ -1,11 +1,14 @@
 package com.companyName.RestTest;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import org.kie.api.runtime.KieContext;
@@ -17,7 +20,10 @@ import org.kie.api.runtime.manager.audit.ProcessInstanceLog;
 import org.kie.api.runtime.manager.audit.VariableInstanceLog;
 import org.kie.api.runtime.process.ProcessInstance;
 import org.kie.api.task.TaskService;
+import org.kie.api.task.model.Task;
+import org.kie.api.task.model.TaskData;
 import org.kie.api.task.model.TaskSummary;
+import org.kie.services.client.api.RemoteRuntimeEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,19 +121,16 @@ public class UpgradeService implements UpgradeEndpoint {
 				String processId) {
 			LOG.info("REST request to start process "+processId+" in " + group + ":" + artifact + ":" + version);
 			RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine(group, artifact, version);
-			KieSession kieSession = runtimeEngine.getKieSession();
-			TaskService taskService = runtimeEngine.getTaskService();
-	
-			
+			KieSession kieSession = runtimeEngine.getKieSession();		
 			//start process with a generic inserted process variable String "progressVar"
-			String progressVar = "notInProduction";
+			String in = "Branden figure this out";
 			/* code to remove non-UTF characters
 			Pattern nonUtf = Pattern.compile("[^\\x00-\\x75]", Pattern.UNICODE_CASE | Pattern.CANON_EQ | Pattern.CASE_INSENSITIVE);
 			Matcher nonUtfMatcher = nonUtf.matcher(progressVar);
 			progressVar = nonUtfMatcher.replaceAll(" ");
 			*/
 			Map<String,Object> parameters = new HashMap<String,Object>();
-			parameters.put("Progress", progressVar);
+			parameters.put("processInput", in);
 			ProcessInstance processInstance = kieSession.startProcess(processId, parameters);
 			//ProcessInstance processInstance = kieSession.startProcess(processId);
 			long processInstanceId = processInstance.getId();
@@ -151,12 +154,56 @@ public class UpgradeService implements UpgradeEndpoint {
 			else
 				return Response.serverError().build();
 		}
+		
+		public Response checkTasks(String group, String artifact,
+				String version, String processId, String processInstanceId) {
+			LOG.info("REST request to check tasks of process "+processId+":" + group + ":" + artifact + ":" + version + ":" + processInstanceId);
+			RuntimeEngine runtimeEngine = runtimeEngineProvider.getRuntimeEngine(group, artifact, version);
+			KieSession kieSession = runtimeEngine.getKieSession();
+			TaskService taskService = runtimeEngine.getTaskService();
+			AuditService auditService = runtimeEngine.getAuditService();
+			Long processInstanceIdLong = Long.valueOf(processInstanceId);
+			List<Long> taskList = taskService.getTasksByProcessInstanceId(processInstanceIdLong);
+			List<? extends NodeInstanceLog> nodeInstanceLogList = auditService.findNodeInstances(processInstanceIdLong); 
+			LOG.info("The processInstanceIdLong is " + processInstanceIdLong.toString());
+			LOG.info(":::::::::::::::::");
+			LOG.info(":::::::::::::::::");
+			LOG.info(":::::::::::::::::");
+			
+			for (Long id : taskList) {
+				LOG.info("The size of the taskList is ::: " + taskList.size());
+				LOG.info("Current taskId is ::: " + id);
+				Task task = taskService.getTaskById(id);
+				TaskData taskData = task.getTaskData();
+				LOG.info("Task:" + id + "'s start time is ::: " + taskData.getActivationTime());
+				LOG.info("Task:" + id + "'s status is ::: " + taskData.getStatus());
+				LOG.info("Task:" + id + "'s end time is ::: " + taskData.getExpirationTime());
+			}
+			
+			LOG.info(":::::::::::::::::");
+			LOG.info(":::::::::::::::::");
+			LOG.info(":::::::::::::::::");
+			
+			for (NodeInstanceLog nodeInstanceLog : nodeInstanceLogList) {
+				LOG.info("The size of the nodeInstanceLogList is ::: " + nodeInstanceLogList.size());
+				LOG.info("Node's name is :::" + nodeInstanceLog.getNodeName());
+				LOG.info("Current nodeInstanceId is ::: " + nodeInstanceLog.getNodeInstanceId());
+				LOG.info("Node:" + nodeInstanceLog.getNodeInstanceId() + "'s start time is ::: " + nodeInstanceLog.getDate().toString());
+				LOG.info("Node:" + nodeInstanceLog.getNodeInstanceId() + "'s type is ::: " + nodeInstanceLog.getNodeType());
+			}
+			
+			return Response.ok("ALL FINISHED!").build();
+			 
+		}
 
+
+	
 	public Response testPost(String jsonPostString) {
 		LOG.info(jsonPostString);
-		return Response.ok("DOm was here" + jsonPostString).build();
+		return Response.ok("Dom was here" + jsonPostString).build();
 	
 	}
 
+	
 }
 
