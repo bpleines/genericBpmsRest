@@ -192,7 +192,13 @@ public class UpgradeService implements UpgradeEndpoint {
 				LOG.info("Node:" + nodeInstanceLog.getNodeInstanceId() + "'s type is ::: " + nodeInstanceLog.getNodeType());
 			}
 			
-			return Response.ok("ALL FINISHED!").build();
+			try {
+				return Response.ok("ALL FINISHED!").build();
+			}
+			catch (Exception e) {
+				System.err.println("NullPointerException: " + e.getMessage());
+				return Response.ok("Process "+processId+ "." + processInstanceId + " has likely completed given that a retrieval of its state results is null. Consult Business Central Process Instances under the Process Management tab to validate").build();
+			}
 			 
 		}
 
